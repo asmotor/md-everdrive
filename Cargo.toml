@@ -1,0 +1,7 @@
+[package]
+name = "everdrive-loader"
+version = "0.1.0"
+authors = ["Carsten Elton Sorensen <csoren@gmail.com>"]
+
+[dependencies]
+clap = "~2.32.0"
