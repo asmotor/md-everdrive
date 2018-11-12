@@ -2,6 +2,11 @@ extern crate serial;
 use serial::prelude::*;
 
 use std::io;
+use arguments;
+
+pub fn error(description: &str) -> serial::Error {
+    serial::Error::from(io::Error::new(std::io::ErrorKind::Other, description))
+}
 
 fn read_byte(port: &mut SerialPort) -> serial::Result<u8> {
     let mut d: [u8; 1] = [0; 1];
@@ -10,13 +15,9 @@ fn read_byte(port: &mut SerialPort) -> serial::Result<u8> {
 }
 
 fn write_byte(port: &mut SerialPort, data: u8) -> serial::Result<()> {
-    let mut d: [u8; 1] = [data; 1];
+    let d: [u8; 1] = [data; 1];
     port.write(&d)?;
     Ok(())
-}
-
-fn error(description: &str) -> serial::Error {
-    serial::Error::from(io::Error::new(std::io::ErrorKind::Other, description))
 }
 
 fn expect(port: &mut SerialPort, data: u8) -> Result<(), serial::Error> {
@@ -37,12 +38,25 @@ pub fn load_data(port: &mut SerialPort, data: &[u8]) -> Result<(), serial::Error
         Err(error("File size exceeded (maximum 15 MiB)"))
     } else {
         port.write(b"*g")?;
-        write_byte(port, (data.len() / 512 / 128) as u8);
+        write_byte(port, (data.len() / 512 / 128) as u8)?;
         expect(port, b'k')?;
 
-        port.write(data);
+        port.write(data)?;
         expect(port, b'd')?;
 
         Ok(())
     }
+}
+
+pub fn start_image(port: &mut SerialPort, image_type: arguments::ImageType) -> Result<(), serial::Error> {
+    let cmd =
+        match image_type {
+            arguments::ImageType::Genesis => { b"*rm" }
+            arguments::ImageType::MasterSystem => { b"*rs" }
+        };
+
+    port.write(cmd)?;
+    expect(port, b'k')?;
+
+    Ok(())
 }
