@@ -51,8 +51,11 @@ pub fn load_data(port: &mut SerialPort, data: &[u8]) -> Result<(), serial::Error
 pub fn start_image(port: &mut SerialPort, image_type: arguments::ImageType) -> Result<(), serial::Error> {
     let cmd =
         match image_type {
-            arguments::ImageType::Genesis => { b"*rm" }
+            arguments::ImageType::MegaDrive => { b"*rm" }
             arguments::ImageType::MasterSystem => { b"*rs" }
+            arguments::ImageType::MegaCD => { b"*rc" }
+            arguments::ImageType::JvcXEye => { b"*rM" }
+            arguments::ImageType::SSF2 => { b"*rS" }
         };
 
     port.write(cmd)?;

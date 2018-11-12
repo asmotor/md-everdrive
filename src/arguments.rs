@@ -5,8 +5,11 @@ use config;
 
 #[derive(Debug)]
 pub enum ImageType {
-    Genesis,
-    MasterSystem
+    MasterSystem,
+    MegaDrive,
+    MegaCD,
+    JvcXEye,
+    SSF2
 }
 
 #[derive(Debug)]
@@ -30,25 +33,31 @@ pub struct Arguments {
 impl Arguments {
     fn app() -> clap::App<'static,'static> {
         return clap_app!(mdeverdrive =>
-            (version: "0.1.0")
-            (author: "Carsten Elton Sorensen <csoren@gmail.com>")
-            (about: "Mega Everdrive X3/5/7 interface")
             (@arg PORT: -p --port +takes_value "Serial port to use")
             (@subcommand run =>
                 (about: "Uploads and runs binary image")
-                (@arg SMS: --sms "Selects Master System mode")
+                (@arg SMS: --("master-system") "Selects Master System mode")
+                (@arg MEGADRIVE: --("mega-drive") conflicts_with[SMS] "Selects Mega Drive mode (default)")
+                (@arg MEGACD: --("mega-cd") conflicts_with[SMS MEGADRIVE] "Selects Mega CD mode")
+                (@arg JVCXEYE: --("jvc-xeye") conflicts_with[SMS MEGADRIVE MEGACD] "Selects JVC X'EYE mode")
+                (@arg SSF: --("ssf2") conflicts_with[SMS MEGACD JVCXEYE] "Selects the SSF2 mapper, implies --mega-drive")
                 (@arg FILENAME: +required "The binary image to run")
             )
             (@subcommand terminal =>
                 (about: "Enters terminal mode")
-            )
-        );
+            ))
+            .author(crate_authors!("\n"))
+            .version(crate_version!())
+            .about(crate_description!());
     }
 
     fn new_run_options(matches: &clap::ArgMatches) -> RunOptions {
         let image_type =
             if matches.is_present("SMS") { ImageType::MasterSystem }
-            else { ImageType::Genesis };
+            else if matches.is_present("MEGACD") { ImageType::MegaCD }
+            else if matches.is_present("JVCXEYE") { ImageType::JvcXEye }
+            else if matches.is_present("SSF") { ImageType::SSF2 }
+            else { ImageType::MegaDrive };
 
         RunOptions {
             filename: matches.value_of("FILENAME").unwrap().to_string(),
