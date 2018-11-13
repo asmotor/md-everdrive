@@ -24,6 +24,10 @@ fn load_file(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error>
     let mut file = std::fs::File::open(filename)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
+
+    let new_len = (data.len() + 65535) & !65535;
+    data.resize(new_len, 0u8);
+    
     everdrive::load_data(port, &data)?;
     Ok(())
 }

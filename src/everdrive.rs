@@ -38,7 +38,7 @@ pub fn load_data(port: &mut SerialPort, data: &[u8]) -> Result<(), serial::Error
         Err(error("File size exceeded (maximum 15 MiB)"))
     } else {
         port.write(b"*g")?;
-        write_byte(port, (data.len() / 512 / 128) as u8)?;
+        write_byte(port, (data.len() / 65536) as u8)?;
         expect(port, b'k')?;
 
         port.write(data)?;

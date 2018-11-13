@@ -1,8 +1,8 @@
 [package]
-name = "everdrive-loader"
+name = "mdeverdrive"
 version = "0.1.0"
 authors = ["Carsten Elton Sorensen <csoren@gmail.com>"]
-description = "Mega Everdrive X3/5/7 interface"
+description = "Mega Everdrive X7 interface"
 
 [dependencies]
 clap = "~2.32.0"
