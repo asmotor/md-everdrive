@@ -8,6 +8,7 @@ extern crate serial;
 use serial::prelude::*;
 
 use std::io::Read;
+use std::io::Write;
 
 mod arguments;
 mod config;
@@ -16,7 +17,6 @@ mod everdrive;
 fn open_port(port_name: &str) -> Result<Box<serial::SerialPort>, serial::Error> {
     let mut serial_port = serial::open(&port_name)?;
     serial_port.set_timeout(std::time::Duration::from_millis(1000))?;
-    everdrive::detect(&mut serial_port)?;
     Ok(Box::new(serial_port))
 }
 
@@ -32,14 +32,31 @@ fn load_file(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error>
     Ok(())
 }
 
-fn run(port_name: &str, options: arguments::RunOptions) -> Result<(), serial::Error> {
+fn terminal_of_port(port: &mut SerialPort) -> Result<(), serial::Error> {
+    port.set_timeout(std::time::Duration::from_secs(60 * 60 * 24))?;
+
+    loop {
+        let d = everdrive::read_byte(port)?;
+        print!("{}", d as char);
+        std::io::stdout().flush()?;
+    }
+}
+
+fn terminal_of_name(port_name: &str) -> Result<(), serial::Error> {
     let mut port = open_port(port_name)?;
-    load_file(&mut *port, &options.filename)?;
-    everdrive::start_image(&mut *port, options.image_type)?;
+    terminal_of_port(&mut *port)?;
     Ok(())
 }
 
-fn terminal(port: &str) {
+fn run(port_name: &str, options: arguments::RunOptions, debug: bool) -> Result<(), serial::Error> {
+    let mut port = open_port(port_name)?;
+    everdrive::detect(&mut *port, debug)?;
+    load_file(&mut *port, &options.filename)?;
+    everdrive::start_image(&mut *port, options.image_type)?;
+    if options.terminal {
+        terminal_of_port(&mut *port)?;
+    }
+    Ok(())
 }
 
 fn inner_main() -> Result<(), serial::Error> {
@@ -48,10 +65,10 @@ fn inner_main() -> Result<(), serial::Error> {
         if let Some(port) = arguments.port {
             match arguments.command {
                 arguments::Command::Run { options } => {
-                    run(&port, options)?;
+                    run(&port, options, arguments.debug)?;
                 }
                 arguments::Command::Terminal => {
-                    terminal(&port);
+                    terminal_of_name(&port)?;
                 }
             };
         } else {

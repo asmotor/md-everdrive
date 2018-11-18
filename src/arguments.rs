@@ -15,7 +15,8 @@ pub enum ImageType {
 #[derive(Debug)]
 pub struct RunOptions {
     pub filename: String,
-    pub image_type: ImageType
+    pub image_type: ImageType,
+    pub terminal: bool
 }
 
 #[derive(Debug)]
@@ -27,6 +28,7 @@ pub enum Command {
 #[derive(Debug)]
 pub struct Arguments {
     pub port: Option<String>,
+    pub debug: bool,
     pub command: Command
 }
 
@@ -34,13 +36,15 @@ impl Arguments {
     fn app() -> clap::App<'static,'static> {
         return clap_app!(mdeverdrive =>
             (@arg PORT: -p --port +takes_value "Serial port to use")
+            (@arg DEBUG: --debug "Prints diagnostic messages")
             (@subcommand run =>
                 (about: "Uploads and runs binary image")
+                (@arg TERMINAL: --terminal "Enters terminal after starting image")
                 (@arg SMS: --("master-system") "Selects Master System mode")
                 (@arg MEGADRIVE: --("mega-drive") conflicts_with[SMS] "Selects Mega Drive mode (default)")
                 (@arg MEGACD: --("mega-cd") conflicts_with[SMS MEGADRIVE] "Selects Mega CD mode")
                 (@arg JVCXEYE: --("jvc-xeye") conflicts_with[SMS MEGADRIVE MEGACD] "Selects JVC X'EYE mode")
-                (@arg SSF: --("ssf2") conflicts_with[SMS MEGACD JVCXEYE] "Selects the SSF2 mapper, implies --mega-drive")
+                (@arg SSF: --ssf conflicts_with[MEGADRIVE SMS MEGACD JVCXEYE] "Selects the extended SSF mapper mode")
                 (@arg FILENAME: +required "The binary image to run")
             )
             (@subcommand terminal =>
@@ -61,7 +65,8 @@ impl Arguments {
 
         RunOptions {
             filename: matches.value_of("FILENAME").unwrap().to_string(),
-            image_type: image_type
+            image_type: image_type,
+            terminal: matches.is_present("TERMINAL")
         }
     }
 
@@ -80,8 +85,9 @@ impl Arguments {
             };
         
         let port = matches.value_of("PORT").map(|s| s.to_string()).or(config.port);
+        let debug = matches.is_present("DEBUG");
 
-        return command.map (|cmd| Arguments { port: port, command: cmd });
+        return command.map (|cmd| Arguments { port: port, debug: debug, command: cmd });
     }
 }
 

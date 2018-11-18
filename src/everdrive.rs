@@ -8,7 +8,7 @@ pub fn error(description: &str) -> serial::Error {
     serial::Error::from(io::Error::new(std::io::ErrorKind::Other, description))
 }
 
-fn read_byte(port: &mut SerialPort) -> serial::Result<u8> {
+pub fn read_byte(port: &mut SerialPort) -> serial::Result<u8> {
     let mut d: [u8; 1] = [0; 1];
     port.read_exact(&mut d)?;
     Ok(d[0])
@@ -21,14 +21,28 @@ fn write_byte(port: &mut SerialPort, data: u8) -> serial::Result<()> {
 }
 
 fn expect(port: &mut SerialPort, data: u8) -> Result<(), serial::Error> {
-    if read_byte(port)? == data {
+    let data_read = read_byte(port)?;
+    if data_read == data {
         Ok(())
     } else {
-        Err(error("Unexpected response"))
+        Err(error(&format!("Unexpected response {}", data_read)))
     }
 }
 
-pub fn detect(port: &mut SerialPort) -> Result<(), serial::Error> {
+fn flush_read_buffer(port: &mut SerialPort, debug: bool) -> Result<(), serial::Error> {
+    if debug { println!("Flushing read buffer"); }
+
+    port.set_timeout(std::time::Duration::from_millis(100))?;
+    while read_byte(port).is_ok() {}
+    port.set_timeout(std::time::Duration::from_millis(1000))?;
+    Ok(())
+}
+
+pub fn detect(port: &mut SerialPort, debug: bool) -> Result<(), serial::Error> {
+    flush_read_buffer(port, debug)?;
+
+    if debug { println!("Sending detect"); }
+
     port.write(b"    *T")?;
     expect(port, b'k')
 }
@@ -58,6 +72,7 @@ pub fn start_image(port: &mut SerialPort, image_type: arguments::ImageType) -> R
             arguments::ImageType::SSF2 => { b"*rS" }
         };
 
+    println!("Starting image");
     port.write(cmd)?;
     expect(port, b'k')?;
 
