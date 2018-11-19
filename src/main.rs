@@ -20,15 +20,42 @@ fn open_port(port_name: &str) -> Result<Box<serial::SerialPort>, serial::Error> 
     Ok(Box::new(serial_port))
 }
 
-fn load_file(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error> {
+fn load_padded_data(filename: &str) -> Result<Vec<u8>, serial::Error> {
     let mut file = std::fs::File::open(filename)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
 
     let new_len = (data.len() + 65535) & !65535;
     data.resize(new_len, 0u8);
-    
+
+    Ok(data)
+}
+
+fn load_bitstream(filename: &str) -> Result<Vec<u8>, serial::Error> {
+    let mut file = std::fs::File::open(filename)?;
+    let mut data = Vec::new();
+    file.read_to_end(&mut data)?;
+
+    data.resize(0x18000, 0xFFu8);
+
+    Ok(data)
+}
+
+fn load_file(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error> {
+    let data = load_padded_data(filename)?;
     everdrive::load_data(port, &data)?;
+    Ok(())
+}
+
+fn load_os(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error> {
+    let data = load_padded_data(filename)?;
+    everdrive::load_os(port, &data)?;
+    Ok(())
+}
+
+fn load_fpga(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error> {
+    let data = load_bitstream(filename)?;
+    everdrive::load_fpga(port, &data)?;
     Ok(())
 }
 
@@ -52,10 +79,26 @@ fn run(port_name: &str, options: arguments::RunOptions, debug: bool) -> Result<(
     let mut port = open_port(port_name)?;
     everdrive::detect(&mut *port, debug)?;
     load_file(&mut *port, &options.filename)?;
-    everdrive::start_image(&mut *port, options.image_type)?;
+    everdrive::start_image(&mut *port, options.image_type, debug)?;
     if options.terminal {
         terminal_of_port(&mut *port)?;
     }
+    Ok(())
+}
+
+fn os(port_name: &str, options: arguments::OSOptions, debug: bool) -> Result<(), serial::Error> {
+    let mut port = open_port(port_name)?;
+    everdrive::detect(&mut *port, debug)?;
+    load_os(&mut *port, &options.filename)?;
+
+    Ok(())
+}
+
+fn fpga(port_name: &str, options: arguments::FPGAOptions, debug: bool) -> Result<(), serial::Error> {
+    let mut port = open_port(port_name)?;
+    everdrive::detect(&mut *port, debug)?;
+    load_fpga(&mut *port, &options.filename)?;
+
     Ok(())
 }
 
@@ -66,6 +109,12 @@ fn inner_main() -> Result<(), serial::Error> {
             match arguments.command {
                 arguments::Command::Run { options } => {
                     run(&port, options, arguments.debug)?;
+                }
+                arguments::Command::OS { options } => {
+                    os(&port, options, arguments.debug)?;
+                }
+                arguments::Command::FPGA { options } => {
+                    fpga(&port, options, arguments.debug)?;
                 }
                 arguments::Command::Terminal => {
                     terminal_of_name(&port)?;

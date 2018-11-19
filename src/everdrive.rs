@@ -62,17 +62,50 @@ pub fn load_data(port: &mut SerialPort, data: &[u8]) -> Result<(), serial::Error
     }
 }
 
-pub fn start_image(port: &mut SerialPort, image_type: arguments::ImageType) -> Result<(), serial::Error> {
+pub fn load_os(port: &mut SerialPort, data: &[u8]) -> Result<(), serial::Error> {
+    if data.len() > 0xF00000 {
+        Err(error("File size exceeded (maximum 15 MiB)"))
+    } else {
+        let blocks = data.len() / 512;
+        port.write(b"*o")?;
+        write_byte(port, (blocks >> 8) as u8)?;
+        write_byte(port, blocks as u8)?;
+
+        port.write(data)?;
+        port.write(b"*R")?;
+
+        Ok(())
+    }
+}
+
+pub fn load_fpga(port: &mut SerialPort, data: &[u8]) -> Result<(), serial::Error> {
+    if data.len() != 0x18000 {
+        Err(error("Wrong size for RBF"))
+    } else {
+        let len = data.len() / 2;
+        port.write(b"*f")?;
+        write_byte(port, (len >> 8) as u8)?;
+        write_byte(port, len as u8)?;
+
+        port.write(data)?;
+
+        Ok(())
+    }
+}
+
+pub fn start_image(port: &mut SerialPort, image_type: arguments::ImageType, debug: bool) -> Result<(), serial::Error> {
     let cmd =
         match image_type {
             arguments::ImageType::MegaDrive => { b"*rm" }
+            arguments::ImageType::OSUnknown => { b"*ro" }
             arguments::ImageType::MasterSystem => { b"*rs" }
             arguments::ImageType::MegaCD => { b"*rc" }
             arguments::ImageType::JvcXEye => { b"*rM" }
             arguments::ImageType::SSF2 => { b"*rS" }
         };
 
-    println!("Starting image");
+    if debug { println!("Starting image"); }
+
     port.write(cmd)?;
     expect(port, b'k')?;
 
