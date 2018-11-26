@@ -23,13 +23,15 @@ This tool is is rewrite of the official usb-tool.exe, which only works well on W
         mdeverdrive run [FLAGS] <FILENAME>
 
     FLAGS:
-            --jvc-xeye         Selects JVC X'EYE mode
-            --mega-cd          Selects Mega CD mode
-            --mega-drive       Selects Mega Drive mode (default)
-            --master-system    Selects Master System mode
-            --ssf2             Selects the SSF2 mapper, implies --mega-drive
-        -h, --help             Prints help information
-        -V, --version          Prints version information
+            --mega-drive-10m    Selects Mega Drive 10MiB mode
+            --mega-cd           Selects Mega CD BIOS mode
+            --mega-drive        Selects Mega Drive mode (default)
+            --osapp             Selects OS app
+            --master-system     Selects Master System mode
+            --ssf               Selects the extended SSF mapper mode
+            --terminal          Enters terminal after starting image
+        -h, --help              Prints help information
+        -V, --version           Prints version information
 
     ARGS:
         <FILENAME>    The binary image to run
@@ -44,7 +46,7 @@ Where the path is the port your X7 uses.
 # Installation
 Currently you will need to have Rust (and Cargo) installed. Then run
 
-    cargo install --path .
+    cargo install --force --path .
 
 ## Drivers
 You may need to install a virtual COM port driver.

@@ -97,10 +97,10 @@ pub fn start_image(port: &mut SerialPort, image_type: arguments::ImageType, debu
     let cmd =
         match image_type {
             arguments::ImageType::MegaDrive => { b"*rm" }
-            arguments::ImageType::OSUnknown => { b"*ro" }
+            arguments::ImageType::OSApp => { b"*ro" }
             arguments::ImageType::MasterSystem => { b"*rs" }
             arguments::ImageType::MegaCD => { b"*rc" }
-            arguments::ImageType::JvcXEye => { b"*rM" }
+            arguments::ImageType::MegaDrive10M => { b"*rM" }
             arguments::ImageType::SSF2 => { b"*rS" }
         };
 

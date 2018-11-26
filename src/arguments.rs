@@ -6,10 +6,10 @@ use config;
 #[derive(Debug)]
 pub enum ImageType {
     MasterSystem,
-    OSUnknown,
+    OSApp,
     MegaDrive,
     MegaCD,
-    JvcXEye,
+    MegaDrive10M,
     SSF2
 }
 
@@ -54,11 +54,11 @@ impl Arguments {
                 (about: "Uploads and runs binary image")
                 (@arg TERMINAL: --terminal "Enters terminal after starting image")
                 (@arg SMS: --("master-system") "Selects Master System mode")
-                (@arg UNKNOWN: --("unknown") "Selects unknown mode (???)")
+                (@arg OS: --("osapp") "Selects OS app")
                 (@arg MEGADRIVE: --("mega-drive") conflicts_with[SMS] "Selects Mega Drive mode (default)")
-                (@arg MEGACD: --("mega-cd") conflicts_with[SMS MEGADRIVE] "Selects Mega CD mode")
-                (@arg JVCXEYE: --("jvc-xeye") conflicts_with[SMS MEGADRIVE MEGACD] "Selects JVC X'EYE mode")
-                (@arg SSF: --ssf conflicts_with[MEGADRIVE SMS MEGACD JVCXEYE] "Selects the extended SSF mapper mode")
+                (@arg MEGACD: --("mega-cd") conflicts_with[SMS MEGADRIVE] "Selects Mega CD BIOS mode")
+                (@arg MD10M: --("mega-drive-10m") conflicts_with[SMS MEGADRIVE MEGACD] "Selects Mega Drive 10MiB mode")
+                (@arg SSF: --ssf conflicts_with[MEGADRIVE SMS MEGACD MD10M] "Selects the extended SSF mapper mode")
                 (@arg FILENAME: +required "The binary image to run")
             )
             (@subcommand fpga =>
@@ -80,9 +80,9 @@ impl Arguments {
     fn new_run_options(matches: &clap::ArgMatches) -> RunOptions {
         let image_type =
             if matches.is_present("SMS") { ImageType::MasterSystem }
-            else if matches.is_present("UNKNOWN") { ImageType::OSUnknown }
+            else if matches.is_present("OS") { ImageType::OSApp }
             else if matches.is_present("MEGACD") { ImageType::MegaCD }
-            else if matches.is_present("JVCXEYE") { ImageType::JvcXEye }
+            else if matches.is_present("MD10M") { ImageType::MegaDrive10M }
             else if matches.is_present("SSF") { ImageType::SSF2 }
             else { ImageType::MegaDrive };
 
