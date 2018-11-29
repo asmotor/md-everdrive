@@ -37,7 +37,7 @@ This tool is is rewrite of the official usb-tool.exe, which only works well on W
         <FILENAME>    The binary image to run
 
 # Configuration
-Specifying the --port argument quickly gets tedious. To avoid having to do that, create a ```~/.mdeverdrive``` file with the contents 
+Specifying the --port argument quickly gets tedious. To avoid having to do that, create a ```~/.everdrivemd``` file with the contents 
 
     port = "/dev/tty.usbserial-XXXXXXXX"
 

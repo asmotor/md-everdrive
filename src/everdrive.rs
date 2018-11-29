@@ -102,6 +102,7 @@ pub fn start_image(port: &mut SerialPort, image_type: arguments::ImageType, debu
             arguments::ImageType::MegaCD => { b"*rc" }
             arguments::ImageType::MegaDrive10M => { b"*rM" }
             arguments::ImageType::SSF2 => { b"*rS" }
+            arguments::ImageType::X32 => { b"*r3" }
         };
 
     if debug { println!("Starting image"); }

@@ -14,7 +14,7 @@ impl Config {
         match dirs::home_dir() {
             Some(path) => {
                 let mut new_path = path.clone();
-                new_path.push(".mdeverdrive");
+                new_path.push(".everdrivemd");
                 Some(new_path)
             }
             _ => None

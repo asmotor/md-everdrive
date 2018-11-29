@@ -10,7 +10,8 @@ pub enum ImageType {
     MegaDrive,
     MegaCD,
     MegaDrive10M,
-    SSF2
+    SSF2,
+    X32
 }
 
 #[derive(Debug)]
@@ -59,6 +60,7 @@ impl Arguments {
                 (@arg MEGACD: --("mega-cd") conflicts_with[SMS MEGADRIVE] "Selects Mega CD BIOS mode")
                 (@arg MD10M: --("mega-drive-10m") conflicts_with[SMS MEGADRIVE MEGACD] "Selects Mega Drive 10MiB mode")
                 (@arg SSF: --ssf conflicts_with[MEGADRIVE SMS MEGACD MD10M] "Selects the extended SSF mapper mode")
+                (@arg X32: --("32x") conflicts_with[SSF MEGADRIVE SMS MEGACD MD10M] "Selects the extended SSF mapper mode")
                 (@arg FILENAME: +required "The binary image to run")
             )
             (@subcommand fpga =>
@@ -84,6 +86,7 @@ impl Arguments {
             else if matches.is_present("MEGACD") { ImageType::MegaCD }
             else if matches.is_present("MD10M") { ImageType::MegaDrive10M }
             else if matches.is_present("SSF") { ImageType::SSF2 }
+            else if matches.is_present("X32") { ImageType::X32 }
             else { ImageType::MegaDrive };
 
         RunOptions {
