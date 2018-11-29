@@ -5,9 +5,10 @@ This tool is is rewrite of the official usb-tool.exe, which only works well on W
 
 # How to use
     USAGE:
-        mdeverdrive [OPTIONS] [SUBCOMMAND]
+        everdrivemd [FLAGS] [OPTIONS] [SUBCOMMAND]
 
     FLAGS:
+            --debug      Prints diagnostic messages
         -h, --help       Prints help information
         -V, --version    Prints version information
 
@@ -15,12 +16,17 @@ This tool is is rewrite of the official usb-tool.exe, which only works well on W
         -p, --port <PORT>    Serial port to use
 
     SUBCOMMANDS:
+        fpga        Uploads alternative FPGA bitstream
         help        Prints this message or the help of the given subcommand(s)
+        os          Uploads and reboots into alternative OS
         run         Uploads and runs binary image
+        terminal    Enters terminal mode
 
 ## The "run" command
+Uploads and runs binary image
+
     USAGE:
-        mdeverdrive run [FLAGS] <FILENAME>
+        everdrivemd run [FLAGS] <FILENAME>
 
     FLAGS:
             --mega-drive-10m    Selects Mega Drive 10MiB mode
@@ -30,6 +36,7 @@ This tool is is rewrite of the official usb-tool.exe, which only works well on W
             --master-system     Selects Master System mode
             --ssf               Selects the extended SSF mapper mode
             --terminal          Enters terminal after starting image
+            --32x               Selects the extended SSF mapper mode
         -h, --help              Prints help information
         -V, --version           Prints version information
 

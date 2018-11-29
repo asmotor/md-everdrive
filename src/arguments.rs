@@ -48,7 +48,7 @@ pub struct Arguments {
 
 impl Arguments {
     fn app() -> clap::App<'static,'static> {
-        return clap_app!(mdeverdrive =>
+        return clap_app!(everdrivemd =>
             (@arg PORT: -p --port +takes_value "Serial port to use")
             (@arg DEBUG: --debug "Prints diagnostic messages")
             (@subcommand run =>
