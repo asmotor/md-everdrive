@@ -60,7 +60,7 @@ impl Arguments {
                 (@arg MEGACD: --("mega-cd") conflicts_with[SMS MEGADRIVE] "Selects Mega CD BIOS mode")
                 (@arg MD10M: --("mega-drive-10m") conflicts_with[SMS MEGADRIVE MEGACD] "Selects Mega Drive 10MiB mode")
                 (@arg SSF: --ssf conflicts_with[MEGADRIVE SMS MEGACD MD10M] "Selects the extended SSF mapper mode")
-                (@arg X32: --("32x") conflicts_with[SSF MEGADRIVE SMS MEGACD MD10M] "Selects the extended SSF mapper mode")
+                (@arg X32: --("32x") conflicts_with[SSF MEGADRIVE SMS MEGACD MD10M] "Selects 32X mode")
                 (@arg FILENAME: +required "The binary image to run")
             )
             (@subcommand fpga =>
@@ -74,7 +74,7 @@ impl Arguments {
             (@subcommand terminal =>
                 (about: "Enters terminal mode")
             ))
-            .author(crate_authors!("\n"))
+            .author(crate_authors!())
             .version(crate_version!())
             .about(crate_description!());
     }

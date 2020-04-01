@@ -1,6 +1,6 @@
 [package]
 name = "everdrivemd"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Carsten Elton Sorensen <csoren@gmail.com>"]
 description = "Mega Everdrive X7 interface"
 

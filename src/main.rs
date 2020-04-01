@@ -14,7 +14,7 @@ mod arguments;
 mod config;
 mod everdrive;
 
-fn open_port(port_name: &str) -> Result<Box<serial::SerialPort>, serial::Error> {
+fn open_port(port_name: &str) -> Result<Box<dyn serial::SerialPort>, serial::Error> {
     let mut serial_port = serial::open(&port_name)?;
     serial_port.set_timeout(std::time::Duration::from_millis(1000))?;
     Ok(Box::new(serial_port))
@@ -41,25 +41,25 @@ fn load_bitstream(filename: &str) -> Result<Vec<u8>, serial::Error> {
     Ok(data)
 }
 
-fn load_file(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error> {
+fn load_file(port: &mut dyn SerialPort, filename: &str) -> Result<(), serial::Error> {
     let data = load_padded_data(filename)?;
     everdrive::load_data(port, &data)?;
     Ok(())
 }
 
-fn load_os(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error> {
+fn load_os(port: &mut dyn SerialPort, filename: &str) -> Result<(), serial::Error> {
     let data = load_padded_data(filename)?;
     everdrive::load_os(port, &data)?;
     Ok(())
 }
 
-fn load_fpga(port: &mut SerialPort, filename: &str) -> Result<(), serial::Error> {
+fn load_fpga(port: &mut dyn SerialPort, filename: &str) -> Result<(), serial::Error> {
     let data = load_bitstream(filename)?;
     everdrive::load_fpga(port, &data)?;
     Ok(())
 }
 
-fn terminal_of_port(port: &mut SerialPort) -> Result<(), serial::Error> {
+fn terminal_of_port(port: &mut dyn SerialPort) -> Result<(), serial::Error> {
     port.set_timeout(std::time::Duration::from_secs(60 * 60 * 24))?;
 
     loop {
