@@ -36,7 +36,7 @@ Uploads and runs binary image
             --master-system     Selects Master System mode
             --ssf               Selects the extended SSF mapper mode
             --terminal          Enters terminal after starting image
-            --32x               Selects the extended SSF mapper mode
+            --32x               Selects 32X mode
         -h, --help              Prints help information
         -V, --version           Prints version information
 
