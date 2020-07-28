@@ -1,7 +1,7 @@
 # What is this?
 This is a frontend for loading images via USB into a Mega Everdrive X7 cartridge, where they will be instantly run on the attached Sega Mega Drive. This provides a fairly pleasant build/deploy cycle for Mega Drive homebrew.
 
-This tool is is rewrite of the official usb-tool.exe, which only works well on Windows. This tool has focus on macOS and Linux, but may work on Windows as well.
+This tool is is rewrite of the official usb-tool.exe, which only works well on Windows. It has focus on macOS and Linux, since 1.0.2 it also works on WSL 1 for Windows.
 
 # How to use
     USAGE:

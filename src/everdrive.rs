@@ -1,26 +1,26 @@
-extern crate serial;
-use serial::prelude::*;
+extern crate serialport;
+use serialport::SerialPort;
 
 use std::io;
 use arguments;
 
-pub fn error(description: &str) -> serial::Error {
-    serial::Error::from(io::Error::new(std::io::ErrorKind::Other, description))
+pub fn error(description: &str) -> serialport::Error {
+    serialport::Error::from(io::Error::new(std::io::ErrorKind::Other, description))
 }
 
-pub fn read_byte(port: &mut dyn SerialPort) -> serial::Result<u8> {
+pub fn read_byte(port: &mut dyn SerialPort) -> serialport::Result<u8> {
     let mut d: [u8; 1] = [0; 1];
     port.read_exact(&mut d)?;
     Ok(d[0])
 }
 
-fn write_byte(port: &mut dyn SerialPort, data: u8) -> serial::Result<()> {
+fn write_byte(port: &mut dyn SerialPort, data: u8) -> serialport::Result<()> {
     let d: [u8; 1] = [data; 1];
     port.write(&d)?;
     Ok(())
 }
 
-fn expect(port: &mut dyn SerialPort, data: u8) -> Result<(), serial::Error> {
+fn expect(port: &mut dyn SerialPort, data: u8) -> Result<(), serialport::Error> {
     let data_read = read_byte(port)?;
     if data_read == data {
         Ok(())
@@ -29,7 +29,7 @@ fn expect(port: &mut dyn SerialPort, data: u8) -> Result<(), serial::Error> {
     }
 }
 
-fn flush_read_buffer(port: &mut dyn SerialPort, debug: bool) -> Result<(), serial::Error> {
+fn flush_read_buffer(port: &mut dyn SerialPort, debug: bool) -> Result<(), serialport::Error> {
     if debug { println!("Flushing read buffer"); }
 
     port.set_timeout(std::time::Duration::from_millis(100))?;
@@ -38,7 +38,7 @@ fn flush_read_buffer(port: &mut dyn SerialPort, debug: bool) -> Result<(), seria
     Ok(())
 }
 
-pub fn detect(port: &mut dyn SerialPort, debug: bool) -> Result<(), serial::Error> {
+pub fn detect(port: &mut dyn SerialPort, debug: bool) -> Result<(), serialport::Error> {
     flush_read_buffer(port, debug)?;
 
     if debug { println!("Sending detect"); }
@@ -47,7 +47,7 @@ pub fn detect(port: &mut dyn SerialPort, debug: bool) -> Result<(), serial::Erro
     expect(port, b'k')
 }
 
-pub fn load_data(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serial::Error> {
+pub fn load_data(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serialport::Error> {
     if data.len() > 0xF00000 {
         Err(error("File size exceeded (maximum 15 MiB)"))
     } else {
@@ -62,7 +62,7 @@ pub fn load_data(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serial::E
     }
 }
 
-pub fn load_os(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serial::Error> {
+pub fn load_os(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serialport::Error> {
     if data.len() > 0xF00000 {
         Err(error("File size exceeded (maximum 15 MiB)"))
     } else {
@@ -78,7 +78,7 @@ pub fn load_os(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serial::Err
     }
 }
 
-pub fn load_fpga(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serial::Error> {
+pub fn load_fpga(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serialport::Error> {
     if data.len() != 0x18000 {
         Err(error("Wrong size for RBF"))
     } else {
@@ -93,7 +93,7 @@ pub fn load_fpga(port: &mut dyn SerialPort, data: &[u8]) -> Result<(), serial::E
     }
 }
 
-pub fn start_image(port: &mut dyn SerialPort, image_type: arguments::ImageType, debug: bool) -> Result<(), serial::Error> {
+pub fn start_image(port: &mut dyn SerialPort, image_type: arguments::ImageType, debug: bool) -> Result<(), serialport::Error> {
     let cmd =
         match image_type {
             arguments::ImageType::MegaDrive => { b"*rm" }

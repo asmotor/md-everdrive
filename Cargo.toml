@@ -1,6 +1,6 @@
 [package]
 name = "everdrivemd"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Carsten Elton Sorensen <csoren@gmail.com>"]
 description = "Mega Everdrive X7 interface"
 
@@ -10,7 +10,7 @@ toml = "0.4.0"
 serde = "1.0"
 serde_derive = "1.0"
 dirs = "1.0.4"
-serial = "0.4"
+serialport = { git = "https://gitlab.com/csoren/serialport-rs.git", branch = "master" }
 
 [profile.release]
 lto = true

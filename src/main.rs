@@ -4,8 +4,8 @@ extern crate clap;
 #[macro_use]
 extern crate serde_derive;
 
-extern crate serial;
-use serial::prelude::*;
+extern crate serialport;
+use serialport::*;
 
 use std::io::Read;
 use std::io::Write;
@@ -14,13 +14,11 @@ mod arguments;
 mod config;
 mod everdrive;
 
-fn open_port(port_name: &str) -> Result<Box<dyn serial::SerialPort>, serial::Error> {
-    let mut serial_port = serial::open(&port_name)?;
-    serial_port.set_timeout(std::time::Duration::from_millis(1000))?;
-    Ok(Box::new(serial_port))
+fn open_port(port_name: &str) -> Result<Box<dyn serialport::SerialPort>> {
+    serialport::new(port_name, 57600).timeout(std::time::Duration::from_millis(1000)).open()
 }
 
-fn load_padded_data(filename: &str) -> Result<Vec<u8>, serial::Error> {
+fn load_padded_data(filename: &str) -> Result<Vec<u8>> {
     let mut file = std::fs::File::open(filename)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
@@ -31,7 +29,7 @@ fn load_padded_data(filename: &str) -> Result<Vec<u8>, serial::Error> {
     Ok(data)
 }
 
-fn load_bitstream(filename: &str) -> Result<Vec<u8>, serial::Error> {
+fn load_bitstream(filename: &str) -> Result<Vec<u8>> {
     let mut file = std::fs::File::open(filename)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
@@ -41,25 +39,25 @@ fn load_bitstream(filename: &str) -> Result<Vec<u8>, serial::Error> {
     Ok(data)
 }
 
-fn load_file(port: &mut dyn SerialPort, filename: &str) -> Result<(), serial::Error> {
+fn load_file(port: &mut dyn SerialPort, filename: &str) -> Result<()> {
     let data = load_padded_data(filename)?;
     everdrive::load_data(port, &data)?;
     Ok(())
 }
 
-fn load_os(port: &mut dyn SerialPort, filename: &str) -> Result<(), serial::Error> {
+fn load_os(port: &mut dyn SerialPort, filename: &str) -> Result<()> {
     let data = load_padded_data(filename)?;
     everdrive::load_os(port, &data)?;
     Ok(())
 }
 
-fn load_fpga(port: &mut dyn SerialPort, filename: &str) -> Result<(), serial::Error> {
+fn load_fpga(port: &mut dyn SerialPort, filename: &str) -> Result<()> {
     let data = load_bitstream(filename)?;
     everdrive::load_fpga(port, &data)?;
     Ok(())
 }
 
-fn terminal_of_port(port: &mut dyn SerialPort) -> Result<(), serial::Error> {
+fn terminal_of_port(port: &mut dyn SerialPort) -> Result<()> {
     port.set_timeout(std::time::Duration::from_secs(60 * 60 * 24))?;
 
     loop {
@@ -69,13 +67,13 @@ fn terminal_of_port(port: &mut dyn SerialPort) -> Result<(), serial::Error> {
     }
 }
 
-fn terminal_of_name(port_name: &str) -> Result<(), serial::Error> {
+fn terminal_of_name(port_name: &str) -> Result<()> {
     let mut port = open_port(port_name)?;
     terminal_of_port(&mut *port)?;
     Ok(())
 }
 
-fn run(port_name: &str, options: arguments::RunOptions, debug: bool) -> Result<(), serial::Error> {
+fn run(port_name: &str, options: arguments::RunOptions, debug: bool) -> Result<()> {
     let mut port = open_port(port_name)?;
     everdrive::detect(&mut *port, debug)?;
     load_file(&mut *port, &options.filename)?;
@@ -86,7 +84,7 @@ fn run(port_name: &str, options: arguments::RunOptions, debug: bool) -> Result<(
     Ok(())
 }
 
-fn os(port_name: &str, options: arguments::OSOptions, debug: bool) -> Result<(), serial::Error> {
+fn os(port_name: &str, options: arguments::OSOptions, debug: bool) -> Result<()> {
     let mut port = open_port(port_name)?;
     everdrive::detect(&mut *port, debug)?;
     load_os(&mut *port, &options.filename)?;
@@ -94,7 +92,7 @@ fn os(port_name: &str, options: arguments::OSOptions, debug: bool) -> Result<(),
     Ok(())
 }
 
-fn fpga(port_name: &str, options: arguments::FPGAOptions, debug: bool) -> Result<(), serial::Error> {
+fn fpga(port_name: &str, options: arguments::FPGAOptions, debug: bool) -> Result<()> {
     let mut port = open_port(port_name)?;
     everdrive::detect(&mut *port, debug)?;
     load_fpga(&mut *port, &options.filename)?;
@@ -102,7 +100,7 @@ fn fpga(port_name: &str, options: arguments::FPGAOptions, debug: bool) -> Result
     Ok(())
 }
 
-fn inner_main() -> Result<(), serial::Error> {
+fn inner_main() -> Result<()> {
     let cfg = config::Config::read();
     if let Some(arguments) = arguments::Arguments::new(cfg) {
         if let Some(port) = arguments.port {
